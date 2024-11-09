@@ -13,12 +13,10 @@ key = b"abcdefghijabcdefghijabcdefghij12"
 key = base64.urlsafe_b64encode(key)
 cipher_suite = Fernet(key)
 
-# Connect to MongoDB Atlas
-client = MongoClient("mongodb+srv://yashwanth0110:uLtgeEmyZPyqTfp4@projectml.9omii.mongodb.net/?retryWrites=true&w=majority&appName=projectml")
-db = client['projectml']
-collection = db['ml']
+# Load the models and vectorizers
+email_model = joblib.load('EmailModel.pkl')
+email_vectorizer = joblib.load('EmailVectorizer.pkl')
 
-# Home route
 @app.route('/')
 def home():
     return "Welcome to the Flask API!"
@@ -35,11 +33,7 @@ def predict():
         data = request_data['data']
         mode = request_data['mode']
 
-        # Load the models and vectorizers only when needed
-        email_model = joblib.load('EmailModel.pkl')
-        email_vectorizer = joblib.load('EmailVectorizer.pkl')
-
-        # Log data and mode
+        # Log incoming data
         print(f"Data: {data}, Mode: {mode}")
 
         # Use the email model and vectorizer
@@ -50,6 +44,11 @@ def predict():
 
         # Encrypt the data
         encrypted_code = cipher_suite.encrypt(data.encode('utf-8'))
+
+        # Lazy load the MongoDB client
+        client = MongoClient("mongodb+srv://yashwanth0110:uLtgeEmyZPyqTfp4@projectml.9omii.mongodb.net/?retryWrites=true&w=majority&appName=projectml")
+        db = client['projectml']
+        collection = db['ml']
 
         # Prepare data to insert into MongoDB
         message_data = {
