@@ -22,6 +22,11 @@ client = MongoClient("mongodb+srv://yashwanth0110:uLtgeEmyZPyqTfp4@projectml.9om
 db = client['projectml']
 collection = db['ml']
 
+# Home route
+@app.route('/')
+def home():
+    return "Welcome to the Flask API!"
+
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
@@ -47,7 +52,7 @@ def predict():
         # Prepare data to insert into MongoDB
         message_data = {
             'message': encrypted_code.decode('utf-8'),
-            'mode': mode,  # Store the mode (Email or SMS) as provided by the frontend
+            'mode': mode,
             'prediction': prediction_label
         }
         collection.insert_one(message_data)
