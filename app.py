@@ -32,7 +32,10 @@ def home():
 def predict():
     try:
         request_data = request.get_json()
-
+        
+        # Log incoming data
+        print(f"Received request data: {request_data}")
+        
         # Validate request data
         if 'data' not in request_data or 'mode' not in request_data:
             return jsonify({'error': 'Missing data or mode in the request'}), 400
@@ -40,11 +43,13 @@ def predict():
         data = request_data['data']
         mode = request_data['mode']
 
-        # Use the email model and vectorizer for both Email and SMS modes
+        # Log data and mode
+        print(f"Data: {data}, Mode: {mode}")
+
+        # Use the email model and vectorizer
         transformed_data = email_vectorizer.transform([data])
         prediction = email_model.predict(transformed_data)
 
-        # Convert prediction to a label
         prediction_label = "Safe" if prediction[0] == 0 else "Phishing"
 
         # Encrypt the data
@@ -58,12 +63,16 @@ def predict():
         }
         collection.insert_one(message_data)
 
-        # Return the response
+        # Log prediction result
+        print(f"Prediction: {prediction_label}")
+
         return jsonify({
             'transcription': data,
             'prediction': prediction_label
         })
     except Exception as e:
+        # Log the exception
+        print(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
