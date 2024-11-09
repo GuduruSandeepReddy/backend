@@ -6,17 +6,12 @@ from cryptography.fernet import Fernet
 import base64
 
 app = Flask(__name__)
-CORS(app, origins=["*"])  # Allow all origins for testing
-
+CORS(app)
 
 # Encryption key setup
 key = b"abcdefghijabcdefghijabcdefghij12"
 key = base64.urlsafe_b64encode(key)
 cipher_suite = Fernet(key)
-
-# Load the email model and vectorizer (used for both Email and SMS)
-email_model = joblib.load('EmailModel.pkl')
-email_vectorizer = joblib.load('EmailVectorizer.pkl')
 
 # Connect to MongoDB Atlas
 client = MongoClient("mongodb+srv://yashwanth0110:uLtgeEmyZPyqTfp4@projectml.9omii.mongodb.net/?retryWrites=true&w=majority&appName=projectml")
@@ -32,16 +27,17 @@ def home():
 def predict():
     try:
         request_data = request.get_json()
-        
-        # Log incoming data
-        print(f"Received request data: {request_data}")
-        
+
         # Validate request data
         if 'data' not in request_data or 'mode' not in request_data:
             return jsonify({'error': 'Missing data or mode in the request'}), 400
 
         data = request_data['data']
         mode = request_data['mode']
+
+        # Load the models and vectorizers only when needed
+        email_model = joblib.load('EmailModel.pkl')
+        email_vectorizer = joblib.load('EmailVectorizer.pkl')
 
         # Log data and mode
         print(f"Data: {data}, Mode: {mode}")
@@ -71,8 +67,7 @@ def predict():
             'prediction': prediction_label
         })
     except Exception as e:
-        # Log the exception
-        print(f"Error: {str(e)}")
+        print(f"Error: {str(e)}")  # Log the error
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
