@@ -6,7 +6,8 @@ from cryptography.fernet import Fernet
 import base64
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["*"])  # Allow all origins for testing
+
 
 # Encryption key setup
 key = b"abcdefghijabcdefghijabcdefghij12"
